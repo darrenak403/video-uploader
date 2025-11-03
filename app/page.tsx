@@ -53,7 +53,7 @@ export default function Home() {
           </a>
           <a
             className={styles.primary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+            href="/upload"
             target="_blank"
             rel="noopener noreferrer"
           >
