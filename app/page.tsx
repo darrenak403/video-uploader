@@ -54,7 +54,6 @@ export default function Home() {
           <a
             className={styles.primary}
             href="/upload"
-            target="_blank"
             rel="noopener noreferrer"
           >
             <Image
