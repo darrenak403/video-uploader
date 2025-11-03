@@ -39,14 +39,14 @@ export default function PublishControls({
     <div className="space-y-6">
       {/* Visibility */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-4">
           Chế độ hiển thị
         </label>
         <div className="space-y-3">
           {VISIBILITY_OPTIONS.map((option) => (
             <label
               key={option.value}
-              className="flex items-start gap-3 p-4 border border-gray-300 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
             >
               <input
                 type="radio"
@@ -59,10 +59,8 @@ export default function PublishControls({
                 className="mt-1 w-4 h-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
               />
               <div className="flex-1">
-                <div className="font-medium text-gray-900 dark:text-white">
-                  {option.label}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="font-medium text-gray-900">{option.label}</div>
+                <div className="text-sm text-gray-600">
                   {option.description}
                 </div>
               </div>
@@ -75,7 +73,7 @@ export default function PublishControls({
       <div>
         <label
           htmlFor="scheduledAt"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-medium text-gray-700 mb-2"
         >
           Lên lịch xuất bản (tùy chọn)
         </label>
@@ -84,20 +82,20 @@ export default function PublishControls({
           type="datetime-local"
           value={value.scheduledAt || ""}
           onChange={(e) => onChange({...value, scheduledAt: e.target.value})}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
           min={new Date().toISOString().slice(0, 16)}
         />
-        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-2 text-xs text-gray-500">
           💡 Để trống để xuất bản ngay lập tức
         </p>
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex gap-3 pt-4 border-t border-gray-200">
         <button
           type="button"
           onClick={onSaveDraft}
-          className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
           💾 Lưu nháp
         </button>
@@ -112,7 +110,7 @@ export default function PublishControls({
       </div>
 
       {!canPublish && (
-        <p className="text-xs text-amber-600 dark:text-amber-400 text-center">
+        <p className="text-xs text-amber-600 text-center">
           ⚠️ Vui lòng hoàn thành xử lý video trước khi xuất bản
         </p>
       )}

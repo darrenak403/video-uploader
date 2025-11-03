@@ -190,26 +190,17 @@ export default function UploadModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-[1000px] w-[92vw] max-h-[90vh] p-0 gap-0 overflow-hidden flex flex-col">
         {/* Header */}
-        <DialogHeader className="flex-shrink-0 border-b border-gray-200 dark:border-gray-800 px-6 py-5">
+        <DialogHeader className="bg-white border-b border-gray-200 px-6 py-5">
           <div className="flex items-center justify-between mb-6">
-            <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
+            <DialogTitle className="text-xl font-semibold text-gray-900">
               Upload Video
             </DialogTitle>
-            {/* Language switcher */}
-            <div className="flex gap-2">
-              <button className="px-3 py-1 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded">
-                EN
-              </button>
-              <button className="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-medium rounded hover:bg-gray-300 dark:hover:bg-gray-600">
-                VI
-              </button>
-            </div>
           </div>
 
           {/* Draft notification */}
           {hasDraft() && (
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center justify-between">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+              <p className="text-sm text-blue-700">
                 We found a saved draft for this video.
               </p>
               <div className="flex gap-2">
@@ -218,13 +209,13 @@ export default function UploadModal({
                     const draft = loadDraft();
                     if (draft) setMetadata(draft);
                   }}
-                  className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                  className="text-xs text-blue-600 hover:underline"
                 >
                   Restore Draft
                 </button>
                 <button
                   onClick={clearDraft}
-                  className="px-3 py-1 bg-black dark:bg-white text-white dark:text-black text-xs font-medium rounded hover:bg-gray-800 dark:hover:bg-gray-100"
+                  className="px-3 py-1 bg-black text-white text-xs font-medium rounded hover:bg-gray-800"
                 >
                   Discard
                 </button>
@@ -233,16 +224,16 @@ export default function UploadModal({
           )}
 
           {/* Steps Navigation */}
-          <div className="flex items-center gap-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-4 border-b border-gray-200">
             <button
               onClick={() => setCurrentStep(STEPS.DETAILS)}
               className={`pb-3 px-2 text-sm font-medium border-b-2 transition-colors ${
                 currentStep === STEPS.DETAILS
-                  ? "border-black dark:border-white text-gray-900 dark:text-white"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "border-black text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs mr-2">
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-black text-white text-xs mr-2">
                 1
               </span>
               Details
@@ -254,15 +245,15 @@ export default function UploadModal({
               disabled={currentStep < STEPS.ELEMENTS}
               className={`pb-3 px-2 text-sm font-medium border-b-2 transition-colors ${
                 currentStep === STEPS.ELEMENTS
-                  ? "border-black dark:border-white text-gray-900 dark:text-white"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "border-black text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               <span
                 className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs mr-2 ${
                   currentStep >= STEPS.ELEMENTS
-                    ? "bg-black dark:bg-white text-white dark:text-black"
-                    : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400"
+                    ? "bg-black text-white"
+                    : "bg-gray-300 text-gray-600"
                 }`}
               >
                 2
@@ -276,15 +267,15 @@ export default function UploadModal({
               disabled={currentStep < STEPS.CHECKS}
               className={`pb-3 px-2 text-sm font-medium border-b-2 transition-colors ${
                 currentStep === STEPS.CHECKS
-                  ? "border-black dark:border-white text-gray-900 dark:text-white"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "border-black text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               <span
                 className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs mr-2 ${
                   currentStep >= STEPS.CHECKS
-                    ? "bg-black dark:bg-white text-white dark:text-black"
-                    : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400"
+                    ? "bg-black text-white"
+                    : "bg-gray-300 text-gray-600"
                 }`}
               >
                 3
@@ -298,15 +289,15 @@ export default function UploadModal({
               disabled={currentStep < STEPS.VISIBILITY}
               className={`pb-3 px-2 text-sm font-medium border-b-2 transition-colors ${
                 currentStep === STEPS.VISIBILITY
-                  ? "border-black dark:border-white text-gray-900 dark:text-white"
-                  : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                  ? "border-black text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               }`}
             >
               <span
                 className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs mr-2 ${
                   currentStep >= STEPS.VISIBILITY
-                    ? "bg-black dark:bg-white text-white dark:text-black"
-                    : "bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400"
+                    ? "bg-black text-white"
+                    : "bg-gray-300 text-gray-600"
                 }`}
               >
                 4
@@ -317,12 +308,12 @@ export default function UploadModal({
         </DialogHeader>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        <div className="flex-1 overflow-y-auto bg-gray-50">
           <div className="p-6">
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Video Preview - Left */}
               <div className="space-y-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-2 shadow-sm">
+                <div className="bg-white rounded-lg p-2 shadow-sm">
                   <VideoPreviewPlayer
                     videoUrl={videoUrl}
                     trimStart={metadata.trimStart}
@@ -330,10 +321,10 @@ export default function UploadModal({
                     onTimeUpdate={(time) => setVideoDuration(time)}
                   />
                   <div className="mt-3 px-2">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                    <p className="text-sm font-semibold text-gray-900">
                       Video Preview
                     </p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-gray-500 mt-1">
                       MP4 •{" "}
                       {videoFile
                         ? (videoFile.size / (1024 * 1024)).toFixed(2)
@@ -353,7 +344,7 @@ export default function UploadModal({
               </div>
 
               {/* Form - Right */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+              <div className="bg-white rounded-lg shadow-sm">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentStep}
@@ -400,31 +391,31 @@ export default function UploadModal({
 
                     {currentStep === STEPS.CHECKS && (
                       <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
                           Final Checks
                         </h3>
                         <div className="space-y-3 text-sm">
-                          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                             <span className="text-xl">✅</span>
-                            <span className="text-gray-700 dark:text-gray-300">
+                            <span className="text-gray-700">
                               Title and description are complete
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                             <span className="text-xl">✅</span>
-                            <span className="text-gray-700 dark:text-gray-300">
+                            <span className="text-gray-700">
                               Thumbnail has been selected
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                             <span className="text-xl">✅</span>
-                            <span className="text-gray-700 dark:text-gray-300">
+                            <span className="text-gray-700">
                               No copyright violations detected
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                             <span className="text-xl">✅</span>
-                            <span className="text-gray-700 dark:text-gray-300">
+                            <span className="text-gray-700">
                               Content is suitable for all audiences
                             </span>
                           </div>
@@ -449,11 +440,11 @@ export default function UploadModal({
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-white dark:bg-gray-800">
+        <div className="flex-shrink-0 border-t border-gray-200 px-6 py-4 bg-white">
           <div className="flex items-center justify-between">
             <button
               onClick={handleSaveDraft}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
             >
               Save Draft
             </button>
@@ -462,7 +453,7 @@ export default function UploadModal({
               {canBack && (
                 <button
                   onClick={handleBack}
-                  className="px-5 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="px-5 py-2 text-sm font-medium border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                 >
                   Back
                 </button>
@@ -472,7 +463,7 @@ export default function UploadModal({
                 <button
                   onClick={handleNext}
                   disabled={currentStep === STEPS.DETAILS && !metadata.title}
-                  className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium text-sm hover:bg-gray-800 dark:hover:bg-gray-100 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                  className="px-6 py-2 bg-black text-white rounded-md font-medium text-sm hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   Next
                 </button>
@@ -480,7 +471,7 @@ export default function UploadModal({
                 <button
                   onClick={handlePublish}
                   disabled={!canPublish}
-                  className="px-6 py-2 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium text-sm hover:bg-gray-800 dark:hover:bg-gray-100 disabled:bg-gray-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                  className="px-6 py-2 bg-black text-white rounded-md font-medium text-sm hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   Publish
                 </button>

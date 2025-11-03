@@ -92,7 +92,7 @@ export default function MetadataForm({
       <div>
         <label
           htmlFor="title"
-          className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+          className="block text-sm font-semibold text-gray-900 mb-2"
         >
           Title <span className="text-red-500">(required)</span>
         </label>
@@ -104,11 +104,9 @@ export default function MetadataForm({
           maxLength={100}
           className={cn(
             "w-full px-3 py-2.5 border rounded-md text-sm",
-            "focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white",
-            "dark:bg-gray-900 dark:border-gray-700 dark:text-white",
-            errors.title
-              ? "border-red-500"
-              : "border-gray-300 dark:border-gray-600"
+            "focus:outline-none focus:ring-2 focus:ring-black",
+            "bg-white border-gray-300 text-gray-900",
+            errors.title ? "border-red-500" : "border-gray-300"
           )}
           placeholder="Sabrina Carpenter - Tears (Official Music Video)"
           aria-invalid={!!errors.title}
@@ -118,7 +116,7 @@ export default function MetadataForm({
           <span id="title-error" className="text-xs text-red-500">
             {errors.title}
           </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-gray-500">
             {(value.title || "").length}/100
           </span>
         </div>
@@ -128,7 +126,7 @@ export default function MetadataForm({
       <div>
         <label
           htmlFor="description"
-          className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+          className="block text-sm font-semibold text-gray-900 mb-2"
         >
           Description
         </label>
@@ -140,17 +138,14 @@ export default function MetadataForm({
           rows={3}
           className={cn(
             "w-full px-3 py-2.5 border rounded-md resize-none text-sm",
-            "focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white",
-            "dark:bg-gray-900 dark:border-gray-700 dark:text-white",
-            "border-gray-300 dark:border-gray-600"
+            "focus:outline-none focus:ring-2 focus:ring-black",
+            "bg-white border-gray-300 text-gray-900"
           )}
           placeholder="Tell viewers about your video..."
         />
         <div className="flex justify-between mt-1.5">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            0/5000
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-gray-500">0/5000</span>
+          <span className="text-xs text-gray-500">
             {(value.description || "").length}/5000
           </span>
         </div>
@@ -160,22 +155,22 @@ export default function MetadataForm({
       <div>
         <label
           htmlFor="tags"
-          className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+          className="block text-sm font-semibold text-gray-900 mb-2"
         >
           Tags
         </label>
-        <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2 min-h-[48px] dark:bg-gray-900 focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
+        <div className="border border-gray-300 rounded-md p-2 min-h-[48px] bg-white focus-within:ring-2 focus-within:ring-black">
           <div className="flex flex-wrap gap-1.5 mb-1">
             {value.tags?.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-xs font-medium"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-200 text-gray-800 rounded text-xs font-medium"
               >
                 #{tag}
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="hover:text-gray-600 dark:hover:text-gray-300 text-sm"
+                  className="hover:text-gray-600 text-sm"
                   aria-label={`Remove tag ${tag}`}
                 >
                   ×
@@ -189,7 +184,7 @@ export default function MetadataForm({
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleTagKeyDown}
-            className="w-full bg-transparent border-none focus:outline-none dark:text-white text-sm px-1"
+            className="w-full bg-transparent border-none focus:outline-none text-gray-900 text-sm px-1"
             placeholder={value.tags?.length ? "" : "Press Enter to add tags"}
             disabled={(value.tags?.length || 0) >= 15}
           />
@@ -197,9 +192,7 @@ export default function MetadataForm({
 
         {/* Tag suggestions */}
         <div className="mt-2">
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
-            Suggested tags:
-          </p>
+          <p className="text-xs text-gray-600 mb-2">Suggested tags:</p>
           <div className="flex flex-wrap gap-2">
             {TAG_SUGGESTIONS.filter((s) => !value.tags?.includes(s))
               .slice(0, 8)
@@ -208,7 +201,7 @@ export default function MetadataForm({
                   key={tag}
                   type="button"
                   onClick={() => addTag(tag)}
-                  className="px-2.5 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                  className="px-2.5 py-1 text-xs bg-gray-100 text-gray-700 border border-gray-300 rounded-full hover:bg-gray-200"
                   disabled={(value.tags?.length || 0) >= 15}
                 >
                   #{tag}
@@ -224,7 +217,7 @@ export default function MetadataForm({
         <div>
           <label
             htmlFor="category"
-            className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+            className="block text-sm font-semibold text-gray-900 mb-2"
           >
             Category
           </label>
@@ -232,7 +225,7 @@ export default function MetadataForm({
             id="category"
             value={value.category || ""}
             onChange={(e) => handleChange("category", e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-900 dark:text-white text-sm"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black bg-white text-gray-900 text-sm"
           >
             <option value="">Select category</option>
             {CATEGORIES.map((cat) => (
@@ -247,7 +240,7 @@ export default function MetadataForm({
         <div>
           <label
             htmlFor="language"
-            className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+            className="block text-sm font-semibold text-gray-900 mb-2"
           >
             Language
           </label>
@@ -255,7 +248,7 @@ export default function MetadataForm({
             id="language"
             value={value.language || "en"}
             onChange={(e) => handleChange("language", e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-900 dark:text-white text-sm"
+            className="w-full px-3 py-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black bg-white text-gray-900 text-sm"
           >
             {LANGUAGES.map((lang) => (
               <option key={lang.value} value={lang.value}>
@@ -267,15 +260,15 @@ export default function MetadataForm({
       </div>
 
       {/* Toggles */}
-      <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="space-y-3 pt-3 border-t border-gray-200">
         <label className="flex items-center gap-3 cursor-pointer group">
           <input
             type="checkbox"
             checked={value.allowComments ?? true}
             onChange={(e) => handleChange("allowComments", e.target.checked)}
-            className="w-4 h-4 text-black dark:text-white rounded focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-4 h-4 text-black rounded focus:ring-2 focus:ring-black"
           />
-          <span className="text-sm text-gray-900 dark:text-gray-100 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+          <span className="text-sm text-gray-900 group-hover:text-gray-600">
             Allow comments
           </span>
         </label>
@@ -285,9 +278,9 @@ export default function MetadataForm({
             type="checkbox"
             checked={value.addToPlaylist ?? false}
             onChange={(e) => handleChange("addToPlaylist", e.target.checked)}
-            className="w-4 h-4 text-black dark:text-white rounded focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-4 h-4 text-black rounded focus:ring-2 focus:ring-black"
           />
-          <span className="text-sm text-gray-900 dark:text-gray-100 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+          <span className="text-sm text-gray-900 group-hover:text-gray-600">
             Add to playlist
           </span>
         </label>

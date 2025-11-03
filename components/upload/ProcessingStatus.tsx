@@ -23,10 +23,8 @@ export default function ProcessingStatus({
         <div className="flex items-center gap-3">
           <FiLoader className="animate-spin text-blue-600" size={24} />
           <div className="flex-1">
-            <p className="font-medium text-gray-900 dark:text-white">
-              Đang tải lên...
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="font-medium text-gray-900">Đang tải lên...</p>
+            <p className="text-sm text-gray-600">
               {Math.round(uploadProgress)}% hoàn thành
             </p>
           </div>
@@ -37,10 +35,8 @@ export default function ProcessingStatus({
         <div className="flex items-center gap-3">
           <FiLoader className="animate-spin text-yellow-600" size={24} />
           <div>
-            <p className="font-medium text-gray-900 dark:text-white">
-              Đang chờ xử lý...
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="font-medium text-gray-900">Đang chờ xử lý...</p>
+            <p className="text-sm text-gray-600">
               Video của bạn đang trong hàng đợi
             </p>
           </div>
@@ -51,10 +47,8 @@ export default function ProcessingStatus({
         <div className="flex items-center gap-3">
           <FiLoader className="animate-spin text-blue-600" size={24} />
           <div>
-            <p className="font-medium text-gray-900 dark:text-white">
-              Đang xử lý video...
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="font-medium text-gray-900">Đang xử lý video...</p>
+            <p className="text-sm text-gray-600">
               Quá trình này có thể mất vài phút
             </p>
           </div>
@@ -62,13 +56,11 @@ export default function ProcessingStatus({
       )}
 
       {status === "ready" && (
-        <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800">
+        <div className="flex items-center gap-3 bg-green-50 border-green-200">
           <FiCheckCircle className="text-green-600" size={24} />
           <div>
-            <p className="font-medium text-green-900 dark:text-green-300">
-              ✅ Sẵn sàng xuất bản
-            </p>
-            <p className="text-sm text-green-700 dark:text-green-400">
+            <p className="font-medium text-green-900">✅ Sẵn sàng xuất bản</p>
+            <p className="text-sm text-green-700">
               Video của bạn đã được xử lý thành công
             </p>
           </div>
@@ -76,14 +68,12 @@ export default function ProcessingStatus({
       )}
 
       {status === "error" && (
-        <div className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+        <div className="bg-red-50 border-red-200">
           <div className="flex items-center gap-3">
             <FiAlertCircle className="text-red-600" size={24} />
             <div className="flex-1">
-              <p className="font-medium text-red-900 dark:text-red-300">
-                ⚠️ Có lỗi xảy ra
-              </p>
-              <p className="text-sm text-red-700 dark:text-red-400">
+              <p className="font-medium text-red-900">⚠️ Có lỗi xảy ra</p>
+              <p className="text-sm text-red-700">
                 {error || "Không thể xử lý video"}
               </p>
             </div>

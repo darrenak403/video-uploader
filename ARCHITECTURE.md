@@ -48,56 +48,865 @@
 
 ## 🔄 Luồng hoạt động chi tiết
 
-### **1️⃣ PAGE LAYER** (`app/upload/page.tsx`)
+### **Luồng hoàn chỉnh: Upload Video từ A đến Z**
 
-**Vai trò:** Entry point của trang upload, quản lý state cao nhất
+#### **Phase 1: Khởi tạo và Chọn File**
 
-#### Code flow:
-
-```typescript
-User visits /upload
-    ↓
-UploadPage component renders
-    ↓
-State initialization:
-  - selectedFile: File | null
-  - modalOpen: boolean
-    ↓
-Render UploadDropzone
-    ↓
-User drops/selects file
-    ↓
-handleFilesSelected() được gọi
-    ↓
-setState:
-  - selectedFile = file
-  - modalOpen = true
-    ↓
-UploadModal mở với videoFile prop
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. USER VISITS /upload                                          │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. PAGE COMPONENT RENDERS (app/upload/page.tsx)                │
+│    - Initialize state:                                          │
+│      • selectedFile: null                                       │
+│      • modalOpen: false                                         │
+│    - Render UploadDropzone component                            │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. UPLOAD DROPZONE READY (components/upload/UploadDropzone.tsx)│
+│    - Shows drag & drop zone                                     │
+│    - "Drop your videos here" text                               │
+│    - "Choose Videos" button                                     │
+│    - File info: "Supports MP4, MOV, AVI. Max file size: 5GB"   │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 4. USER ACTION - Drag file hoặc Click button                   │
+│    A. Drag & Drop:                                              │
+│       - User drags video.mp4 over dropzone                      │
+│       - onDragEnter → setIsDragging(true)                       │
+│       - Border changes to blue, shows animation                 │
+│       - onDrop → captures file from e.dataTransfer.files        │
+│                                                                 │
+│    B. Click to Select:                                          │
+│       - User clicks "Choose Videos" button                      │
+│       - Opens file picker dialog                                │
+│       - User selects video.mp4                                  │
+│       - onChange event captures file from input                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 5. FILE VALIDATION (UploadDropzone → lib/utils.ts)             │
+│    processFiles([video.mp4])                                    │
+│         ↓                                                       │
+│    validateVideoFile(file, maxSizeBytes)                        │
+│         ↓                                                       │
+│    Checks:                                                      │
+│    ✓ Is file type video/*? → YES                               │
+│    ✓ Is size < 5GB? → YES                                      │
+│         ↓                                                       │
+│    Returns: { valid: true }                                     │
+│         ↓                                                       │
+│    onFilesSelected([video.mp4]) // Callback to page            │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 6. PAGE RECEIVES FILE (app/upload/page.tsx)                    │
+│    handleFilesSelected(files)                                   │
+│         ↓                                                       │
+│    setSelectedFile(files[0]) // video.mp4                       │
+│    setModalOpen(true)                                           │
+│         ↓                                                       │
+│    State updated → Component re-renders                         │
+│         ↓                                                       │
+│    UploadModal renders with props:                              │
+│    - open={true}                                                │
+│    - videoFile={video.mp4}                                      │
+│    - onCancel={handleModalClose}                                │
+│    - onComplete={handleComplete}                                │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-#### State management:
+#### **Phase 2: Modal Initialization & Upload Start**
 
-```typescript
-// State ở page level
-const [selectedFile, setSelectedFile] = useState<File | null>(null);
-const [modalOpen, setModalOpen] = useState(false);
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 7. UPLOAD MODAL MOUNTS (components/upload/UploadModal.tsx)     │
+│    Component initialization:                                    │
+│    - currentStep = 1 (DETAILS)                                  │
+│    - videoUrl = null                                            │
+│    - videoDuration = 0                                          │
+│    - metadata = { title: "", description: "", tags: [], ... }   │
+│    - errors = {}                                                │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 8. HOOKS INITIALIZATION                                         │
+│                                                                 │
+│    A. useAutosave Hook (lib/hooks.ts)                           │
+│       const { saveDraft, loadDraft, clearDraft, hasDraft }     │
+│             = useAutosave("video-upload-draft")                 │
+│       ↓                                                         │
+│       Check localStorage for existing draft:                    │
+│       - hasDraft() checks if key exists                         │
+│       - If found: prompt "Restore draft?" → loadDraft()         │
+│       - Load previous metadata into state                       │
+│                                                                 │
+│    B. useUploadProgress Hook (lib/hooks.ts)                     │
+│       const uploadState = useUploadProgress()                   │
+│       Initial state:                                            │
+│       {                                                         │
+│         uploadProgress: 0,                                      │
+│         processingStatus: "idle",                               │
+│         uploadId: null,                                         │
+│         videoId: null,                                          │
+│         error: null                                             │
+│       }                                                         │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 9. VIDEO OBJECT URL CREATION                                    │
+│    useEffect(() => {                                            │
+│      if (videoFile) {                                           │
+│        const url = URL.createObjectURL(videoFile)               │
+│        setVideoUrl(url)                                         │
+│        uploadState.startUpload(videoFile)                       │
+│                                                                 │
+│        return () => URL.revokeObjectURL(url) // Cleanup         │
+│      }                                                          │
+│    }, [videoFile])                                              │
+│                                                                 │
+│    Result:                                                      │
+│    - videoUrl = "blob:http://localhost:3000/abc-123"            │
+│    - Upload simulation starts                                   │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 10. UPLOAD SIMULATION STARTS (useUploadProgress hook)          │
+│     startUpload(file)                                           │
+│         ↓                                                       │
+│     Generate uploadId = "upload_1730678400000"                  │
+│         ↓                                                       │
+│     setState({                                                  │
+│       processingStatus: "uploading",                            │
+│       uploadProgress: 0,                                        │
+│       uploadId: "upload_1730678400000"                          │
+│     })                                                          │
+│         ↓                                                       │
+│     setInterval (500ms):                                        │
+│       progress += random(0-15)                                  │
+│       setState({ uploadProgress: progress })                    │
+│         ↓                                                       │
+│     When progress >= 100:                                       │
+│       clearInterval()                                           │
+│       ↓                                                         │
+│       setTimeout 500ms → processingStatus = "queued"            │
+│                          videoId = "video_1730678401000"        │
+│       ↓                                                         │
+│       setTimeout 2000ms → processingStatus = "processing"       │
+│       ↓                                                         │
+│       setTimeout 3000ms → processingStatus = "ready"            │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-// Event handlers
-const handleFilesSelected = (files: File[]) => {
-  setSelectedFile(files[0]);
-  setModalOpen(true);
-};
+#### **Phase 3: Step 1 - Details (Metadata Form)**
 
-const handleModalClose = () => {
-  setModalOpen(false);
-  setSelectedFile(null);
-};
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 11. MODAL RENDERS STEP 1 - DETAILS                             │
+│                                                                 │
+│     Layout (2-column grid):                                     │
+│     ┌─────────────────────┬─────────────────────┐              │
+│     │  LEFT COLUMN        │  RIGHT COLUMN       │              │
+│     │  (Video Preview)    │  (Metadata Form)    │              │
+│     ├─────────────────────┼─────────────────────┤              │
+│     │ VideoPreviewPlayer  │ MetadataForm        │              │
+│     │ - Shows video       │ - Title input       │              │
+│     │ - 9:16 aspect ratio │ - Description       │              │
+│     │ - HD badge          │ - Tags input        │              │
+│     │ - Duration overlay  │ - Category select   │              │
+│     │                     │ - Language select   │              │
+│     │ ProcessingStatus    │ - Allow comments ✓  │              │
+│     │ - "Uploading... 45%"│ - Add to playlist   │              │
+│     └─────────────────────┴─────────────────────┘              │
+│                                                                 │
+│     Header:                                                     │
+│     - "Upload Video" title                                      │
+│     - Language switcher: [EN] [VI]                              │
+│     - Tab navigation: [1 Details] [2 Elements] [3 Checks] ...  │
+│                                                                 │
+│     Footer:                                                     │
+│     - "Save Draft" button (left)                                │
+│     - "Next" button (right, disabled if title empty)            │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 12. USER FILLS METADATA FORM                                    │
+│                                                                 │
+│     A. Title Input:                                             │
+│        User types: "Amazing Cooking Tutorial"                   │
+│        ↓                                                        │
+│        onChange event                                           │
+│        ↓                                                        │
+│        handleChange("title", "Amazing Cooking Tutorial")        │
+│        ↓                                                        │
+│        Parent onChange callback                                 │
+│        ↓                                                        │
+│        setMetadata({ ...metadata, title: "Amazing..." })        │
+│        ↓                                                        │
+│        Component re-renders with new value                      │
+│        ↓                                                        │
+│        Character counter updates: "28/100"                      │
+│        ↓                                                        │
+│        "Next" button becomes enabled                            │
+│                                                                 │
+│     B. Description Input:                                       │
+│        User types: "Learn how to cook delicious pasta..."       │
+│        ↓                                                        │
+│        Same flow as title                                       │
+│        ↓                                                        │
+│        Counter updates: "45/5000"                               │
+│                                                                 │
+│     C. Tags Input:                                              │
+│        User types: "cooking" + Enter                            │
+│        ↓                                                        │
+│        handleTagKeyDown detects Enter                           │
+│        ↓                                                        │
+│        addTag("cooking")                                        │
+│        ↓                                                        │
+│        tags array: ["cooking"]                                  │
+│        ↓                                                        │
+│        Renders chip: "#cooking" with × button                   │
+│        ↓                                                        │
+│        User clicks suggested tag "#tutorial"                    │
+│        ↓                                                        │
+│        tags array: ["cooking", "tutorial"]                      │
+│                                                                 │
+│     D. Category & Language:                                     │
+│        User selects: category="education", language="en"        │
+│        ↓                                                        │
+│        Updates metadata state                                   │
+│                                                                 │
+│     E. Toggles:                                                 │
+│        User checks "Allow comments" = true                      │
+│        User unchecks "Add to playlist" = false                  │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 13. AUTO-SAVE TRIGGERED                                         │
+│     useEffect(() => {                                           │
+│       if (open && metadata.title) {                             │
+│         const timer = setTimeout(() => {                        │
+│           saveDraft(metadata)                                   │
+│         }, 2000)                                                │
+│         return () => clearTimeout(timer)                        │
+│       }                                                         │
+│     }, [metadata, open])                                        │
+│         ↓                                                       │
+│     After 2 seconds of inactivity:                              │
+│         ↓                                                       │
+│     saveDraft(metadata) from useAutosave hook                   │
+│         ↓                                                       │
+│     localStorage.setItem("video-upload-draft", JSON.stringify({ │
+│       ...metadata,                                              │
+│       savedAt: "2025-11-03T10:30:00.000Z"                       │
+│     }))                                                         │
+│         ↓                                                       │
+│     Draft saved silently in background                          │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 14. PROCESSING STATUS UPDATES (Parallel to user input)         │
+│     ProcessingStatus component monitors uploadState:            │
+│                                                                 │
+│     T+0s:   "Uploading... 0%"                                   │
+│     T+0.5s: "Uploading... 12%"                                  │
+│     T+1s:   "Uploading... 27%"                                  │
+│     T+1.5s: "Uploading... 43%"                                  │
+│     ...                                                         │
+│     T+5s:   "Uploading... 100%"                                 │
+│     T+5.5s: "Waiting in queue..." (status="queued")             │
+│     T+7.5s: "Processing video..." (status="processing")         │
+│     T+10.5s: "✅ Ready to publish" (status="ready")             │
+│              Green background, checkmark icon                   │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 15. USER CLICKS "NEXT" BUTTON                                   │
+│     handleNext()                                                │
+│         ↓                                                       │
+│     validateStep(1) // DETAILS step                             │
+│         ↓                                                       │
+│     Validation checks:                                          │
+│     - title not empty? ✓ YES                                    │
+│     - title.trim().length > 0? ✓ YES                            │
+│         ↓                                                       │
+│     setErrors({}) // Clear any errors                           │
+│         ↓                                                       │
+│     setCurrentStep(2) // Move to ELEMENTS                       │
+│         ↓                                                       │
+│     Framer Motion animation:                                    │
+│     - Current content slides out left (opacity 1→0, x 0→-20)    │
+│     - New content slides in from right (opacity 0→1, x 20→0)    │
+│     - Duration: 200ms                                           │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-const handleComplete = (videoId: string) => {
-  console.log("Video uploaded:", videoId);
-  // Navigate or show success message
-};
+#### **Phase 4: Step 2 - Video Elements**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 16. STEP 2 - VIDEO ELEMENTS RENDERS                            │
+│                                                                 │
+│     Layout:                                                     │
+│     ┌─────────────────────┬─────────────────────┐              │
+│     │  LEFT COLUMN        │  RIGHT COLUMN       │              │
+│     ├─────────────────────┼─────────────────────┤              │
+│     │ VideoPreviewPlayer  │ ThumbnailSelector   │              │
+│     │ (same as before)    │ ┌───┬───┬───┬───┐  │              │
+│     │                     │ │ 1 │ 2 │ 3 │ + │  │              │
+│     │ ProcessingStatus    │ └───┴───┴───┴───┘  │              │
+│     │ "✅ Ready"           │ (4 thumbnail slots) │              │
+│     │                     │                     │              │
+│     │                     │ TrimTool            │              │
+│     │                     │ ━━━━▐████▌━━━━      │              │
+│     │                     │ Start: 0:05         │              │
+│     │                     │ End: 1:30           │              │
+│     │                     │ Duration: 1:25      │              │
+│     └─────────────────────┴─────────────────────┘              │
+│                                                                 │
+│     Tab navigation: [1 Details] [2 Elements•] [3 Checks] ...   │
+│                      (Element tab is now active/highlighted)    │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 17. USER SELECTS THUMBNAIL                                      │
+│     ThumbnailSelector renders 3 auto-generated thumbnails:      │
+│     - Thumbnail 1: frame at 10% (0:15)                          │
+│     - Thumbnail 2: frame at 50% (1:15)                          │
+│     - Thumbnail 3: frame at 90% (2:15)                          │
+│     - Custom upload slot                                        │
+│         ↓                                                       │
+│     User clicks Thumbnail 2 (middle one)                        │
+│         ↓                                                       │
+│     onClick={() => onSelect(1)}                                 │
+│         ↓                                                       │
+│     Parent callback: setMetadata({                              │
+│       ...metadata,                                              │
+│       thumbnailIndex: 1                                         │
+│     })                                                          │
+│         ↓                                                       │
+│     Component re-renders:                                       │
+│     - Thumbnail 2 shows blue border + ring                      │
+│     - Blue checkmark overlay appears                            │
+│     - Other thumbnails return to gray border                    │
+│                                                                 │
+│     Alternative: User uploads custom thumbnail                  │
+│         ↓                                                       │
+│     Clicks upload slot (+ icon)                                 │
+│         ↓                                                       │
+│     File picker opens                                           │
+│         ↓                                                       │
+│     User selects image.jpg                                      │
+│         ↓                                                       │
+│     handleFileSelect(e)                                         │
+│         ↓                                                       │
+│     Validates: file.type.startsWith("image/")? ✓                │
+│         ↓                                                       │
+│     FileReader.readAsDataURL(file)                              │
+│         ↓                                                       │
+│     setPreviewUrl(dataURL)                                      │
+│     onCustomUpload(file)                                        │
+│     onSelect(3) // Custom index                                 │
+│         ↓                                                       │
+│     Custom thumbnail shows with preview                         │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 18. USER TRIMS VIDEO                                            │
+│     TrimTool component:                                         │
+│     - Video duration: 150s (2:30)                               │
+│     - Initial: trimStart=0, trimEnd=150                         │
+│         ↓                                                       │
+│     User drags START slider to 5s                               │
+│         ↓                                                       │
+│     onChange event on range input                               │
+│         ↓                                                       │
+│     handleStartChange(5)                                        │
+│         ↓                                                       │
+│     Validation: 5 < trimEnd (150)? ✓ YES                        │
+│         ↓                                                       │
+│     setStart(5)                                                 │
+│     onTrimChange(5, 150)                                        │
+│         ↓                                                       │
+│     Parent updates: setMetadata({                               │
+│       ...metadata,                                              │
+│       trimStart: 5,                                             │
+│       trimEnd: 150                                              │
+│     })                                                          │
+│         ↓                                                       │
+│     UI updates:                                                 │
+│     - Blue selection bar moves to start at 5s                   │
+│     - Start label: "0:05"                                       │
+│     - Duration label: "2:25"                                    │
+│         ↓                                                       │
+│     User drags END slider to 90s                                │
+│         ↓                                                       │
+│     handleEndChange(90)                                         │
+│         ↓                                                       │
+│     Validation: 90 > trimStart (5)? ✓ YES                       │
+│                90 <= duration (150)? ✓ YES                      │
+│         ↓                                                       │
+│     setEnd(90)                                                  │
+│     onTrimChange(5, 90)                                         │
+│         ↓                                                       │
+│     Final trim: 0:05 → 1:30 (85 seconds)                        │
+│         ↓                                                       │
+│     VideoPreviewPlayer receives new props:                      │
+│     - trimStart={5}                                             │
+│     - trimEnd={90}                                              │
+│         ↓                                                       │
+│     Video player respects trim boundaries:                      │
+│     - On timeupdate: if (currentTime >= 90) {                   │
+│         video.pause()                                           │
+│         video.currentTime = 5                                   │
+│       }                                                         │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 19. USER CLICKS "NEXT" → STEP 3                                │
+│     handleNext()                                                │
+│         ↓                                                       │
+│     validateStep(2) // No required fields in Elements           │
+│         ↓                                                       │
+│     setCurrentStep(3)                                           │
+│         ↓                                                       │
+│     Framer Motion transition to CHECKS step                     │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### **Phase 5: Step 3 - Final Checks**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 20. STEP 3 - CHECKS RENDERS                                    │
+│                                                                 │
+│     Layout:                                                     │
+│     ┌─────────────────────┬─────────────────────┐              │
+│     │  LEFT COLUMN        │  RIGHT COLUMN       │              │
+│     ├─────────────────────┼─────────────────────┤              │
+│     │ VideoPreviewPlayer  │ Final Checks        │              │
+│     │ (with trim applied) │                     │              │
+│     │                     │ ✅ Title and        │              │
+│     │ ProcessingStatus    │    description      │              │
+│     │ "✅ Ready"           │    complete         │              │
+│     │                     │                     │              │
+│     │                     │ ✅ Thumbnail        │              │
+│     │                     │    selected         │              │
+│     │                     │                     │              │
+│     │                     │ ✅ No copyright     │              │
+│     │                     │    violations       │              │
+│     │                     │                     │              │
+│     │                     │ ✅ Content suitable │              │
+│     │                     │    for all ages     │              │
+│     └─────────────────────┴─────────────────────┘              │
+│                                                                 │
+│     All checks are green (mock validation)                      │
+│     User reviews the summary                                    │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 21. USER CLICKS "NEXT" → STEP 4 (FINAL STEP)                   │
+│     handleNext()                                                │
+│         ↓                                                       │
+│     validateStep(3) // No validation needed                     │
+│         ↓                                                       │
+│     setCurrentStep(4)                                           │
+│         ↓                                                       │
+│     Transition to VISIBILITY step                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### **Phase 6: Step 4 - Visibility & Publish**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 22. STEP 4 - VISIBILITY/PUBLISH CONTROLS                       │
+│                                                                 │
+│     Layout:                                                     │
+│     ┌─────────────────────┬─────────────────────┐              │
+│     │  LEFT COLUMN        │  RIGHT COLUMN       │              │
+│     ├─────────────────────┼─────────────────────┤              │
+│     │ VideoPreviewPlayer  │ PublishControls     │              │
+│     │                     │                     │              │
+│     │ ProcessingStatus    │ Visibility:         │              │
+│     │ "✅ Ready"           │ ◉ Public            │              │
+│     │                     │   Everyone can view │              │
+│     │                     │                     │              │
+│     │                     │ ○ Unlisted          │              │
+│     │                     │   Only with link    │              │
+│     │                     │                     │              │
+│     │                     │ ○ Private           │              │
+│     │                     │   Only you          │              │
+│     │                     │                     │              │
+│     │                     │ Schedule (optional):│              │
+│     │                     │ [Date/Time picker]  │              │
+│     │                     │                     │              │
+│     │                     │ [💾 Save Draft]     │              │
+│     │                     │ [🚀 Publish]        │              │
+│     └─────────────────────┴─────────────────────┘              │
+│                                                                 │
+│     Footer:                                                     │
+│     - "Save Draft" button (left)                                │
+│     - "Back" button (now visible, center-right)                 │
+│     - "Publish" button replaces "Next" (right)                  │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 23. USER SELECTS VISIBILITY                                     │
+│     User clicks "Public" radio button                           │
+│         ↓                                                       │
+│     onChange event                                              │
+│         ↓                                                       │
+│     onChange({ ...value, visibility: "public" })                │
+│         ↓                                                       │
+│     Parent: setMetadata({ ...metadata, visibility: "public" }) │
+│         ↓                                                       │
+│     Radio button shows checked state                            │
+│                                                                 │
+│     Optional: User sets schedule                                │
+│         ↓                                                       │
+│     Selects date: 2025-11-10 15:00                              │
+│         ↓                                                       │
+│     onChange({ ...value, scheduledAt: "2025-11-10T15:00" })    │
+│         ↓                                                       │
+│     Publish button text changes to "📅 Schedule"                │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 24. USER CLICKS "PUBLISH" BUTTON                                │
+│     onClick={handlePublish}                                     │
+│         ↓                                                       │
+│     handlePublish() in UploadModal                              │
+│         ↓                                                       │
+│     Check 1: Processing status ready?                           │
+│     if (uploadState.processingStatus !== "ready") {             │
+│       alert("Please wait for processing to complete!")          │
+│       return                                                    │
+│     }                                                           │
+│     ✓ Status is "ready" → Continue                              │
+│         ↓                                                       │
+│     Check 2: All required fields filled?                        │
+│     ✓ Title exists                                              │
+│     ✓ Video processed                                           │
+│         ↓                                                       │
+│     Clear saved draft:                                          │
+│     clearDraft() // Remove from localStorage                    │
+│         ↓                                                       │
+│     Call completion callback:                                   │
+│     onComplete(uploadState.videoId) // "video_1730678401000"    │
+│         ↓                                                       │
+│     Close modal:                                                │
+│     onOpenChange(false)                                         │
+│         ↓                                                       │
+│     Reset upload state:                                         │
+│     uploadState.reset()                                         │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+#### **Phase 7: Completion & Cleanup**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 25. PAGE RECEIVES COMPLETION CALLBACK                           │
+│     app/upload/page.tsx: handleComplete(videoId)                │
+│         ↓                                                       │
+│     console.log("Video uploaded:", videoId)                     │
+│     // Output: "Video uploaded: video_1730678401000"            │
+│         ↓                                                       │
+│     In production, would:                                       │
+│     - Show success toast notification                           │
+│     - Navigate to video page: router.push(`/video/${videoId}`)  │
+│     - Or redirect to library: router.push("/library")           │
+│     - Send analytics event                                      │
+│         ↓                                                       │
+│     Modal state updates:                                        │
+│     setModalOpen(false)                                         │
+│     setSelectedFile(null)                                       │
+│         ↓                                                       │
+│     Component re-renders:                                       │
+│     - Modal unmounts (AnimatePresence exit animation)           │
+│     - Returns to initial UploadDropzone view                    │
+│     - Ready for next upload                                     │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 26. CLEANUP & MEMORY MANAGEMENT                                 │
+│                                                                 │
+│     A. VideoPreviewPlayer cleanup:                              │
+│        useEffect return (unmount):                              │
+│        - Remove video event listeners                           │
+│        - Pause video playback                                   │
+│        - video.src = ""                                         │
+│                                                                 │
+│     B. UploadModal cleanup:                                     │
+│        useEffect return:                                        │
+│        - URL.revokeObjectURL(videoUrl)                          │
+│        - Clear timers from useUploadProgress                    │
+│        - Clear autosave timeout                                 │
+│                                                                 │
+│     C. State reset:                                             │
+│        - All component states return to initial values          │
+│        - Memory freed for next upload                           │
+│                                                                 │
+│     D. localStorage:                                            │
+│        - Draft cleared (if published)                           │
+│        - Or kept (if user closed without publishing)            │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│ 27. APPLICATION READY FOR NEXT UPLOAD                           │
+│     User sees initial upload page again:                        │
+│     - Clean UploadDropzone                                      │
+│     - "Drop your videos here" message                           │
+│     - "Choose Videos" button                                    │
+│     - No leftover state from previous upload                    │
+│         ↓                                                       │
+│     Process can repeat from Phase 1                             │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### **Luồng Phụ: Error Handling**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ ERROR SCENARIO 1: Invalid File Type                             │
+│                                                                 │
+│ User drops document.pdf into dropzone                           │
+│     ↓                                                           │
+│ processFiles([document.pdf])                                    │
+│     ↓                                                           │
+│ validateVideoFile(file)                                         │
+│     ↓                                                           │
+│ Check: file.type.startsWith("video/")                           │
+│     ↓                                                           │
+│ ❌ NO → Returns { valid: false, error: "File must be video" }   │
+│     ↓                                                           │
+│ setError("File must be video")                                  │
+│     ↓                                                           │
+│ Shows red error box below dropzone                              │
+│ "❌ File must be video"                                         │
+│     ↓                                                           │
+│ Modal does NOT open                                             │
+│ User remains on upload page                                     │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ERROR SCENARIO 2: File Too Large                                │
+│                                                                 │
+│ User selects video.mp4 (6.5 GB)                                 │
+│     ↓                                                           │
+│ validateVideoFile(file, 5 * 1024 * 1024 * 1024)                │
+│     ↓                                                           │
+│ Check: file.size (6.5GB) > maxSizeBytes (5GB)                   │
+│     ↓                                                           │
+│ ❌ YES → Returns { valid: false, error: "File exceeds 5 GB" }   │
+│     ↓                                                           │
+│ Shows error in dropzone                                         │
+│     ↓                                                           │
+│ User must select smaller file                                   │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ERROR SCENARIO 3: Missing Required Field                        │
+│                                                                 │
+│ User tries to click "Next" on Step 1 without title              │
+│     ↓                                                           │
+│ handleNext()                                                    │
+│     ↓                                                           │
+│ validateStep(1)                                                 │
+│     ↓                                                           │
+│ Check: metadata.title && metadata.title.trim().length > 0       │
+│     ↓                                                           │
+│ ❌ NO → setErrors({ title: "Title is required" })               │
+│     ↓                                                           │
+│ return false (validation failed)                                │
+│     ↓                                                           │
+│ Red error text appears under title input                        │
+│ "Title is required"                                             │
+│     ↓                                                           │
+│ Step does NOT advance                                           │
+│ User must fill title before proceeding                          │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ERROR SCENARIO 4: Processing Not Complete                       │
+│                                                                 │
+│ User clicks "Publish" while status="processing"                 │
+│     ↓                                                           │
+│ handlePublish()                                                 │
+│     ↓                                                           │
+│ Check: uploadState.processingStatus !== "ready"                 │
+│     ↓                                                           │
+│ ❌ TRUE → alert("Please wait for processing!")                  │
+│     ↓                                                           │
+│ return (stop execution)                                         │
+│     ↓                                                           │
+│ Alert shows to user                                             │
+│ Publish does NOT proceed                                        │
+│ User must wait for "ready" status                               │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### **Luồng Phụ: Draft Recovery**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ DRAFT SCENARIO: User Returns After Closing Mid-Upload           │
+│                                                                 │
+│ Previous session:                                               │
+│ - User filled metadata                                          │
+│ - Auto-save triggered                                           │
+│ - localStorage saved draft                                      │
+│ - User closed browser/tab                                       │
+│     ↓                                                           │
+│ New session:                                                    │
+│ User visits /upload again                                       │
+│     ↓                                                           │
+│ Selects new video file                                          │
+│     ↓                                                           │
+│ UploadModal opens                                               │
+│     ↓                                                           │
+│ useEffect on mount:                                             │
+│   if (open && hasDraft()) {                                     │
+│     const draft = loadDraft()                                   │
+│     if (confirm("We found a saved draft. Restore?")) {          │
+│       setMetadata(draft)                                        │
+│     }                                                           │
+│   }                                                             │
+│     ↓                                                           │
+│ Browser shows confirm dialog:                                   │
+│ "We found a saved draft for this video."                        │
+│ [Restore Draft] [Discard]                                       │
+│     ↓                                                           │
+│ If user clicks "Restore Draft":                                 │
+│     ↓                                                           │
+│ loadDraft() retrieves from localStorage                         │
+│     ↓                                                           │
+│ setMetadata(draft) restores:                                    │
+│ - title: "Amazing Cooking Tutorial"                             │
+│ - description: "Learn how to..."                                │
+│ - tags: ["cooking", "tutorial"]                                 │
+│ - category: "education"                                         │
+│ - etc.                                                          │
+│     ↓                                                           │
+│ Form fields populate with saved data                            │
+│ User can continue where they left off                           │
+│     ↓                                                           │
+│ If user clicks "Discard":                                       │
+│     ↓                                                           │
+│ clearDraft() removes from localStorage                          │
+│ Fresh form with empty fields                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### **Timeline View: Complete Upload Flow**
+
+```
+Time    Status                  Component               Action
+────────────────────────────────────────────────────────────────────
+0:00    Page Load              UploadPage              Render dropzone
+0:05    File Selected          UploadDropzone          Validate file
+0:06    Modal Open             UploadModal             Initialize hooks
+0:06    Upload Start           useUploadProgress       progress: 0%
+0:06    Object URL Created     UploadModal             Set videoUrl
+0:07    Auto-save Check        useAutosave             Check draft
+0:10    Step 1 Render          MetadataForm            Show form fields
+
+        [User fills form - 30 seconds]
+
+0:40    Title Entered          MetadataForm            "Amazing Cooking..."
+0:42    Auto-save Triggered    useAutosave             Save to localStorage
+0:50    Tags Added             MetadataForm            ["cooking", "tutorial"]
+1:00    Category Selected      MetadataForm            "education"
+
+        [Meanwhile, upload progresses in background]
+
+0:07    Upload Progress        ProcessingStatus        15%
+0:08    Upload Progress        ProcessingStatus        32%
+0:09    Upload Progress        ProcessingStatus        58%
+0:10    Upload Progress        ProcessingStatus        85%
+0:11    Upload Complete        ProcessingStatus        100%
+0:11    Status: Queued         ProcessingStatus        "Waiting..."
+0:13    Status: Processing     ProcessingStatus        "Processing..."
+0:16    Status: Ready          ProcessingStatus        "✅ Ready"
+
+1:10    Next Clicked           UploadModal             Validate → Step 2
+1:12    Step 2 Render          ThumbnailSelector       Show thumbnails
+                                TrimTool                Show trim slider
+
+        [User customizes - 20 seconds]
+
+1:15    Thumbnail Selected     ThumbnailSelector       Index: 1
+1:25    Trim Adjusted          TrimTool                5s → 90s
+1:30    Next Clicked           UploadModal             → Step 3
+1:32    Step 3 Render          Checks                  Show checklist
+1:35    Next Clicked           UploadModal             → Step 4
+1:37    Step 4 Render          PublishControls         Show visibility
+1:40    Public Selected        PublishControls         visibility: "public"
+1:45    Publish Clicked        UploadModal             handlePublish()
+1:45    Draft Cleared          useAutosave             Remove localStorage
+1:45    Callback Fired         UploadPage              handleComplete()
+1:45    Modal Close            UploadModal             Cleanup & unmount
+1:46    Success State          UploadPage              Ready for next upload
+```
+
+---
+
+### **Data Flow Summary**
+
+```
+FILE SELECTION
+    ↓
+VALIDATION (lib/utils.ts)
+    ↓
+PAGE STATE UPDATE (page.tsx)
+    ↓
+MODAL OPENS (UploadModal.tsx)
+    ├→ VIDEO URL CREATION
+    ├→ HOOKS INITIALIZATION
+    │   ├→ useAutosave (localStorage)
+    │   └→ useUploadProgress (mock upload)
+    └→ COMPONENT TREE RENDER
+        ├→ VideoPreviewPlayer (left)
+        ├→ ProcessingStatus (left bottom)
+        └→ Step Components (right)
+            ├→ Step 1: MetadataForm
+            ├→ Step 2: ThumbnailSelector + TrimTool
+            ├→ Step 3: Checks List
+            └→ Step 4: PublishControls
+    ↓
+USER INTERACTIONS
+    ├→ Form inputs → metadata state
+    ├→ Auto-save → localStorage
+    ├→ Upload progress → uploadState
+    └→ Step navigation → currentStep
+    ↓
+VALIDATION
+    ├→ Per-step validation
+    ├→ Required field checks
+    └→ Processing status check
+    ↓
+PUBLISH
+    ├→ Clear draft
+    ├→ Fire callback
+    └→ Close modal
+    ↓
+CLEANUP
+    ├→ Revoke object URLs
+    ├→ Clear timers
+    └→ Reset states
+    ↓
+READY FOR NEXT UPLOAD
 ```
 
 ---

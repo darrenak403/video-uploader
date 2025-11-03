@@ -3,6 +3,7 @@
 import {useRef, useState, DragEvent} from "react";
 import {FiUploadCloud, FiVideo} from "react-icons/fi";
 import {validateVideoFile} from "@/lib/utils";
+import {Button} from "../ui/button";
 
 interface UploadDropzoneProps {
   onFilesSelected: (files: File[]) => void;
@@ -83,15 +84,15 @@ export default function UploadDropzone({
     <div className="w-full">
       <div
         className={`
-          relative border-2 border-dashed rounded-xl p-16 text-center
+          relative border-2 border-dashed rounded-xl p-16 text-center h-[420px]
           transition-all duration-200
           ${
             isDragging
-              ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-              : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-300 bg-white"
           }
           ${error ? "border-red-500" : ""}
-          hover:border-gray-400 dark:hover:border-gray-600
+          hover:border-gray-400
         `}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -111,46 +112,48 @@ export default function UploadDropzone({
           aria-label="Select video file"
         />
 
-        <div className="flex flex-col items-center gap-6">
+        <div className="flex flex-col items-center justify-start w-full h-full gap-6">
           {isDragging ? (
             <FiVideo className="w-12 h-12 text-blue-500 animate-bounce" />
           ) : (
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-full">
-              <FiUploadCloud className="w-7 h-7 text-gray-500 dark:text-gray-400" />
+            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 rounded-full">
+              <FiUploadCloud className="w-7 h-7 text-gray-500" />
             </div>
           )}
-
+          {/* Title drop zone */}
           <div>
-            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <p className="text-xl font-semibold text-gray-900 mb-2">
               {isDragging ? "Drop your videos here" : "Drop your videos here"}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-gray-500">
               Or click to browse your files
             </p>
           </div>
 
-          <button
+          {/* Button */}
+          <Button
             type="button"
+            size={"lg"}
+            className={`w-48 h-12 bg-black text-white rounded-md font-medium text-sm ${
+              isDragging ? "cursor-progress" : "cursor-pointer"
+            }`}
             onClick={handleButtonClick}
-            className="
-              px-8 py-3 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium text-sm
-              hover:bg-gray-800 dark:hover:bg-gray-100 active:bg-gray-900 dark:active:bg-gray-200
-              focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
-              transition-colors
-            "
           >
-            Choose Videos
-          </button>
+            <p className="">Choose Videos</p>
+          </Button>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            Supports MP4, MOV, AVI. Max file size: 5GB
-          </p>
+          {/* Footer dropzone:  File type and size information */}
+          <div>
+            <p className="text-xs text-gray-500 mt-1">
+              Supports MP4, MOV, AVI. Max file size: 5GB
+            </p>
+          </div>
         </div>
       </div>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-          <p className="text-sm text-red-600 dark:text-red-400">❌ {error}</p>
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-sm text-red-600">❌ {error}</p>
         </div>
       )}
     </div>

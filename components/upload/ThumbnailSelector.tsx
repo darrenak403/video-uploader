@@ -53,10 +53,10 @@ export default function ThumbnailSelector({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+        <label className="block text-sm font-medium text-gray-700 mb-3">
           Hình thu nhỏ
         </label>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        <p className="text-xs text-gray-500 mb-4">
           Chọn hoặc tải lên hình ảnh thể hiện nội dung video của bạn
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function ThumbnailSelector({
               "hover:border-blue-400 hover:scale-105",
               selectedIndex === index
                 ? "border-blue-600 ring-2 ring-blue-600"
-                : "border-gray-300 dark:border-gray-700"
+                : "border-gray-300"
             )}
           >
             <img
@@ -104,7 +104,7 @@ export default function ThumbnailSelector({
             "flex flex-col items-center justify-center gap-2",
             selectedIndex === 3
               ? "border-blue-600 ring-2 ring-blue-600"
-              : "border-gray-300 dark:border-gray-700 border-dashed"
+              : "border-gray-300 border-dashed"
           )}
         >
           {previewUrl ? (
@@ -124,11 +124,8 @@ export default function ThumbnailSelector({
             </>
           ) : (
             <>
-              <FiUpload
-                className="text-gray-400 dark:text-gray-500"
-                size={20}
-              />
-              <span className="text-xs text-gray-500 dark:text-gray-400 text-center px-2">
+              <FiUpload className="text-gray-400" size={20} />
+              <span className="text-xs text-gray-500 text-center px-2">
                 Tải lên
               </span>
             </>
@@ -145,7 +142,7 @@ export default function ThumbnailSelector({
         />
       </div>
 
-      <p className="text-xs text-gray-500 dark:text-gray-400">
+      <p className="text-xs text-gray-500">
         💡 Gợi ý: Sử dụng hình ảnh 1280x720 (16:9) để có chất lượng tốt nhất
       </p>
     </div>

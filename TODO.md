@@ -6,6 +6,70 @@
 
 ---
 
+## 🌞 TASK: Chuyển đổi hệ thống sang Light Mode (không phụ thuộc trình duyệt)
+
+### Mục tiêu
+Ép buộc ứng dụng luôn hiển thị ở chế độ sáng (light mode), bỏ qua cài đặt dark mode của hệ thống/trình duyệt.
+
+### Các bước thực hiện
+
+#### 1. Cập nhật `app/globals.css`
+**Xóa hoặc vô hiệu hóa dark mode query:**
+
+```css
+/* XÓA hoặc comment đoạn này */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* THAY BẰNG: */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: light; /* Ép buộc light mode */
+  }
+}
+```
+
+**Hoặc xóa hoàn toàn class `.dark`:**
+```css
+/* Xóa toàn bộ block .dark {...} nếu không dùng dark mode toggle */
+```
+
+#### 2. Cập nhật `app/layout.tsx` (nếu cần)
+Đảm bảo không có class `dark` trong thẻ `<html>` hoặc `<body>`:
+
+```tsx
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>
+        {children}
+      </body>
+    </html>
+  )
+}
+```
+
+#### 3. Kiểm tra các component
+- Đảm bảo không có component nào sử dụng `useTheme()` hoặc `next-themes` để toggle dark mode
+- Xóa các toggle button dark/light mode nếu có
+
+#### 4. Testing
+- [ ] Kiểm tra trên browser với system dark mode
+- [ ] Kiểm tra trên browser với system light mode
+- [ ] App phải luôn hiển thị light mode trong cả 2 trường hợp
+
+### Kết quả mong đợi
+✅ Ứng dụng luôn hiển thị với nền trắng, text màu đen
+✅ Không bị ảnh hưởng bởi cài đặt `prefers-color-scheme` của hệ thống
+✅ CSS variables trong `:root` được sử dụng (không dùng `.dark`)
+
+---
+
+---
+
 ## 🧱 0) Chuẩn bị môi trường
 
 - Node.js ≥ 18

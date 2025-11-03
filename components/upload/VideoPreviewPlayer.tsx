@@ -65,45 +65,45 @@ export default function VideoPreviewPlayer({
 
   if (!videoUrl) {
     return (
-      <div className="w-full aspect-video bg-gray-900 rounded-lg flex items-center justify-center">
+      <div className="w-full max-w-[360px] mx-auto aspect-[9/16] bg-gray-900 rounded-2xl flex items-center justify-center">
         <div className="text-center text-gray-400">
           <MdHd className="w-16 h-16 mx-auto mb-4 opacity-50" />
           <p>Video preview</p>
+          <p className="text-xs mt-2">Vertical format (9:16)</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full rounded-lg overflow-hidden bg-black relative">
+    <div className="w-full max-w-[360px] mx-auto rounded-2xl overflow-hidden bg-black relative shadow-2xl">
       <video
         ref={videoRef}
         src={videoUrl}
         controls
         autoPlay={autoplay}
         muted
-        className="w-full aspect-video"
+        className="w-full aspect-[9/16] object-cover"
         playsInline
       >
         Your browser does not support video playback.
       </video>
 
-      {/* HD Badge */}
-      <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-xs font-bold text-white flex items-center gap-1">
-        <MdHd />
-        <span>HD</span>
-      </div>
-
-      {/* Duration overlay */}
-      <div className="absolute bottom-16 right-4 bg-black/70 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">
+      {/* Duration overlay - Top right */}
+      <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-white shadow-lg">
         {formatDuration(currentTime)} / {formatDuration(duration)}
       </div>
 
-      {/* Trim indicators */}
+      {/* Trim indicators - Bottom with gradient overlay */}
       {(trimStart > 0 || (trimEnd && trimEnd < duration)) && (
-        <div className="absolute bottom-16 left-4 bg-yellow-500/90 backdrop-blur-sm px-2 py-1 rounded text-xs font-medium text-black">
-          ✂️ Đã cắt: {formatDuration(trimStart)} -{" "}
-          {formatDuration(trimEnd || duration)}
+        <div className="absolute bottom-20 left-3 right-3">
+          <div className="bg-gradient-to-r from-yellow-500 to-orange-500 backdrop-blur-md px-3 py-2 rounded-full text-xs font-semibold text-white shadow-xl flex items-center justify-center gap-2">
+            <span>✂️</span>
+            <span>
+              Trimmed: {formatDuration(trimStart)} -{" "}
+              {formatDuration(trimEnd || duration)}
+            </span>
+          </div>
         </div>
       )}
     </div>

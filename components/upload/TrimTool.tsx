@@ -42,18 +42,16 @@ export default function TrimTool({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <FiScissors className="text-gray-600 dark:text-gray-400" />
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <FiScissors className="text-gray-600" />
+        <label className="block text-sm font-medium text-gray-700">
           Cắt video
         </label>
       </div>
 
-      <p className="text-xs text-gray-500 dark:text-gray-400">
-        Chọn phần video bạn muốn giữ lại
-      </p>
+      <p className="text-xs text-gray-500">Chọn phần video bạn muốn giữ lại</p>
 
       {/* Timeline visualization */}
-      <div className="relative h-12 bg-gray-200 dark:bg-gray-700 rounded-lg overflow-hidden">
+      <div className="relative h-12 bg-gray-200 rounded-lg overflow-hidden">
         {/* Selected range */}
         <div
           className="absolute h-full bg-blue-500/30 border-l-2 border-r-2 border-blue-600"
