@@ -49,7 +49,7 @@ export default function MetadataForm({
 }: MetadataFormProps) {
   const [tagInput, setTagInput] = useState("");
 
-  const handleChange = (field: keyof VideoMetadata, val: any) => {
+  const handleChange = (field: keyof VideoMetadata, val: unknown) => {
     onChange({...value, [field]: val});
   };
 
@@ -87,14 +87,14 @@ export default function MetadataForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Title */}
       <div>
         <label
           htmlFor="title"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
         >
-          Tiêu đề <span className="text-red-500">*</span>
+          Title <span className="text-red-500">(required)</span>
         </label>
         <input
           id="title"
@@ -103,20 +103,22 @@ export default function MetadataForm({
           onChange={(e) => handleChange("title", e.target.value)}
           maxLength={100}
           className={cn(
-            "w-full px-4 py-2 border rounded-lg",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500",
-            "dark:bg-gray-800 dark:border-gray-700 dark:text-white",
-            errors.title ? "border-red-500" : "border-gray-300"
+            "w-full px-3 py-2.5 border rounded-md text-sm",
+            "focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white",
+            "dark:bg-gray-900 dark:border-gray-700 dark:text-white",
+            errors.title
+              ? "border-red-500"
+              : "border-gray-300 dark:border-gray-600"
           )}
-          placeholder="Thêm tiêu đề mô tả video của bạn"
+          placeholder="Sabrina Carpenter - Tears (Official Music Video)"
           aria-invalid={!!errors.title}
           aria-describedby={errors.title ? "title-error" : undefined}
         />
-        <div className="flex justify-between mt-1">
+        <div className="flex justify-between mt-1.5">
           <span id="title-error" className="text-xs text-red-500">
             {errors.title}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {(value.title || "").length}/100
           </span>
         </div>
@@ -126,26 +128,29 @@ export default function MetadataForm({
       <div>
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
         >
-          Mô tả
+          Description
         </label>
         <textarea
           id="description"
           value={value.description || ""}
           onChange={(e) => handleChange("description", e.target.value)}
           maxLength={5000}
-          rows={4}
+          rows={3}
           className={cn(
-            "w-full px-4 py-2 border rounded-lg resize-none",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500",
-            "dark:bg-gray-800 dark:border-gray-700 dark:text-white",
-            "border-gray-300"
+            "w-full px-3 py-2.5 border rounded-md resize-none text-sm",
+            "focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white",
+            "dark:bg-gray-900 dark:border-gray-700 dark:text-white",
+            "border-gray-300 dark:border-gray-600"
           )}
-          placeholder="Giới thiệu về video của bạn cho người xem"
+          placeholder="Tell viewers about your video..."
         />
-        <div className="flex justify-end mt-1">
-          <span className="text-xs text-gray-500">
+        <div className="flex justify-between mt-1.5">
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            0/5000
+          </span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {(value.description || "").length}/5000
           </span>
         </div>
@@ -155,23 +160,23 @@ export default function MetadataForm({
       <div>
         <label
           htmlFor="tags"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+          className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
         >
-          Tags (tối đa 15)
+          Tags
         </label>
-        <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-2 min-h-[60px] dark:bg-gray-800">
-          <div className="flex flex-wrap gap-2 mb-2">
+        <div className="border border-gray-300 dark:border-gray-600 rounded-md p-2 min-h-[48px] dark:bg-gray-900 focus-within:ring-2 focus-within:ring-black dark:focus-within:ring-white">
+          <div className="flex flex-wrap gap-1.5 mb-1">
             {value.tags?.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm"
+                className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded text-xs font-medium"
               >
-                {tag}
+                #{tag}
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="hover:text-blue-600 dark:hover:text-blue-300"
-                  aria-label={`Xóa tag ${tag}`}
+                  className="hover:text-gray-600 dark:hover:text-gray-300 text-sm"
+                  aria-label={`Remove tag ${tag}`}
                 >
                   ×
                 </button>
@@ -184,98 +189,106 @@ export default function MetadataForm({
             value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={handleTagKeyDown}
-            className="w-full bg-transparent border-none focus:outline-none dark:text-white"
-            placeholder={value.tags?.length ? "" : "Nhấn Enter để thêm tag"}
+            className="w-full bg-transparent border-none focus:outline-none dark:text-white text-sm px-1"
+            placeholder={value.tags?.length ? "" : "Press Enter to add tags"}
             disabled={(value.tags?.length || 0) >= 15}
           />
         </div>
 
         {/* Tag suggestions */}
-        <div className="flex flex-wrap gap-2 mt-2">
-          {TAG_SUGGESTIONS.filter((s) => !value.tags?.includes(s))
-            .slice(0, 5)
-            .map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => addTag(tag)}
-                className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300"
-                disabled={(value.tags?.length || 0) >= 15}
-              >
-                + {tag}
-              </button>
-            ))}
+        <div className="mt-2">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+            Suggested tags:
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {TAG_SUGGESTIONS.filter((s) => !value.tags?.includes(s))
+              .slice(0, 8)
+              .map((tag) => (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => addTag(tag)}
+                  className="px-2.5 py-1 text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+                  disabled={(value.tags?.length || 0) >= 15}
+                >
+                  #{tag}
+                </button>
+              ))}
+          </div>
         </div>
       </div>
 
-      {/* Category */}
-      <div>
-        <label
-          htmlFor="category"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          Danh mục
-        </label>
-        <select
-          id="category"
-          value={value.category || ""}
-          onChange={(e) => handleChange("category", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Chọn danh mục</option>
-          {CATEGORIES.map((cat) => (
-            <option key={cat.value} value={cat.value}>
-              {cat.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Category and Language in grid */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Category */}
+        <div>
+          <label
+            htmlFor="category"
+            className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+          >
+            Category
+          </label>
+          <select
+            id="category"
+            value={value.category || ""}
+            onChange={(e) => handleChange("category", e.target.value)}
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-900 dark:text-white text-sm"
+          >
+            <option value="">Select category</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat.value} value={cat.value}>
+                {cat.labelEn}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      {/* Language */}
-      <div>
-        <label
-          htmlFor="language"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          Ngôn ngữ video
-        </label>
-        <select
-          id="language"
-          value={value.language || "vi"}
-          onChange={(e) => handleChange("language", e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        >
-          {LANGUAGES.map((lang) => (
-            <option key={lang.value} value={lang.value}>
-              {lang.label}
-            </option>
-          ))}
-        </select>
+        {/* Language */}
+        <div>
+          <label
+            htmlFor="language"
+            className="block text-sm font-semibold text-gray-900 dark:text-white mb-2"
+          >
+            Language
+          </label>
+          <select
+            id="language"
+            value={value.language || "en"}
+            onChange={(e) => handleChange("language", e.target.value)}
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white dark:bg-gray-900 dark:text-white text-sm"
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang.value} value={lang.value}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Toggles */}
-      <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <label className="flex items-center gap-3 cursor-pointer">
+      <div className="space-y-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <label className="flex items-center gap-3 cursor-pointer group">
           <input
             type="checkbox"
             checked={value.allowComments ?? true}
             onChange={(e) => handleChange("allowComments", e.target.checked)}
-            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            className="w-4 h-4 text-black dark:text-white rounded focus:ring-2 focus:ring-black dark:focus:ring-white"
           />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Cho phép bình luận
+          <span className="text-sm text-gray-900 dark:text-gray-100 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+            Allow comments
           </span>
         </label>
 
-        <label className="flex items-center gap-3 cursor-pointer">
+        <label className="flex items-center gap-3 cursor-pointer group">
           <input
             type="checkbox"
             checked={value.addToPlaylist ?? false}
             onChange={(e) => handleChange("addToPlaylist", e.target.checked)}
-            className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+            className="w-4 h-4 text-black dark:text-white rounded focus:ring-2 focus:ring-black dark:focus:ring-white"
           />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            Thêm vào playlist
+          <span className="text-sm text-gray-900 dark:text-gray-100 group-hover:text-gray-600 dark:group-hover:text-gray-300">
+            Add to playlist
           </span>
         </label>
       </div>

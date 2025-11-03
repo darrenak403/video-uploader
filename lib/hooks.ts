@@ -1,4 +1,4 @@
-import {useState, useEffect, useCallback} from "react";
+import {useState, useCallback} from "react";
 
 // Types
 export interface VideoMetadata {
@@ -35,6 +35,7 @@ export interface UploadState {
 export function useAutosave(key: string) {
   const saveDraft = useCallback(
     (metadata: Partial<VideoMetadata>) => {
+      if (typeof window === "undefined") return false;
       try {
         localStorage.setItem(
           key,
@@ -55,6 +56,7 @@ export function useAutosave(key: string) {
   const loadDraft = useCallback(():
     | (Partial<VideoMetadata> & {savedAt?: string})
     | null => {
+    if (typeof window === "undefined") return null;
     try {
       const saved = localStorage.getItem(key);
       return saved ? JSON.parse(saved) : null;
@@ -65,6 +67,7 @@ export function useAutosave(key: string) {
   }, [key]);
 
   const clearDraft = useCallback(() => {
+    if (typeof window === "undefined") return false;
     try {
       localStorage.removeItem(key);
       return true;
@@ -75,7 +78,12 @@ export function useAutosave(key: string) {
   }, [key]);
 
   const hasDraft = useCallback((): boolean => {
-    return localStorage.getItem(key) !== null;
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(key) !== null;
+    } catch {
+      return false;
+    }
   }, [key]);
 
   return {saveDraft, loadDraft, clearDraft, hasDraft};
@@ -91,7 +99,7 @@ export function useUploadProgress() {
     error: null,
   });
 
-  const startUpload = useCallback((file: File) => {
+  const startUpload = useCallback((_file: File) => {
     const uploadId = `upload_${Date.now()}`;
     setState({
       uploadProgress: 0,

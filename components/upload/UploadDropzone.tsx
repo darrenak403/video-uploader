@@ -83,7 +83,7 @@ export default function UploadDropzone({
     <div className="w-full">
       <div
         className={`
-          relative border-2 border-dashed rounded-lg p-12 text-center
+          relative border-2 border-dashed rounded-xl p-16 text-center
           transition-all duration-200
           ${
             isDragging
@@ -91,7 +91,7 @@ export default function UploadDropzone({
               : "border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800"
           }
           ${error ? "border-red-500" : ""}
-          hover:border-blue-400 dark:hover:border-blue-600
+          hover:border-gray-400 dark:hover:border-gray-600
         `}
         onDragEnter={handleDragEnter}
         onDragOver={handleDragOver}
@@ -99,7 +99,7 @@ export default function UploadDropzone({
         onDrop={handleDrop}
         role="button"
         tabIndex={0}
-        aria-label="Kéo thả video vào đây hoặc nhấn để chọn file"
+        aria-label="Drag and drop video here or click to select file"
         onKeyDown={handleKeyDown}
       >
         <input
@@ -108,38 +108,42 @@ export default function UploadDropzone({
           accept={accept}
           onChange={handleFileInput}
           className="hidden"
-          aria-label="Chọn file video"
+          aria-label="Select video file"
         />
 
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6">
           {isDragging ? (
-            <FiVideo className="w-16 h-16 text-blue-500 animate-bounce" />
+            <FiVideo className="w-12 h-12 text-blue-500 animate-bounce" />
           ) : (
-            <FiUploadCloud className="w-16 h-16 text-gray-400 dark:text-gray-500" />
+            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-full">
+              <FiUploadCloud className="w-7 h-7 text-gray-500 dark:text-gray-400" />
+            </div>
           )}
 
           <div>
-            <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              {isDragging ? "Thả video vào đây" : "Kéo thả video vào đây"}
+            <p className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              {isDragging ? "Drop your videos here" : "Drop your videos here"}
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400">hoặc</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Or click to browse your files
+            </p>
           </div>
 
           <button
             type="button"
             onClick={handleButtonClick}
             className="
-              px-6 py-3 bg-blue-600 text-white rounded-lg font-medium
-              hover:bg-blue-700 active:bg-blue-800
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+              px-8 py-3 bg-black dark:bg-white text-white dark:text-black rounded-md font-medium text-sm
+              hover:bg-gray-800 dark:hover:bg-gray-100 active:bg-gray-900 dark:active:bg-gray-200
+              focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2
               transition-colors
             "
           >
-            Chọn video
+            Choose Videos
           </button>
 
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-            Hỗ trợ: MP4, AVI, MOV, WMV (tối đa 5GB)
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Supports MP4, MOV, AVI. Max file size: 5GB
           </p>
         </div>
       </div>

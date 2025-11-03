@@ -28,13 +28,14 @@ export default function UploadPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
-            Tải video lên
+      <div className="w-full max-w-3xl">
+        <div className="text-center mb-10">
+          <h1 className="text-5xl font-bold mb-3 text-gray-900 dark:text-white">
+            Upload Your Videos
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Kéo thả video vào đây hoặc chọn file từ máy tính
+            Drag and drop your video files or click to browse. Your videos will
+            be saved to your personal library.
           </p>
         </div>
 
