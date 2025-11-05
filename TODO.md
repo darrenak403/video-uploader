@@ -325,4 +325,50 @@ git commit -m "feat: upload modal UI skeleton"
 > 🧑‍💻 Next step:
 > Run `pnpm dev` → mở `/upload` → test modal flow!
 > Nếu muốn tự động tạo `UploadModal.tsx` (shadcn + Tailwind + framer-motion) → yêu cầu thêm prompt `"Generate UploadModal.tsx code"`.
+
+---
+
+## 🔁 TASK: Integrate Video.js for robust video handling
+
+Mục tiêu: Thay thế hoặc bọc player hiện tại bằng Video.js để có playback ổn định, hỗ trợ seek/trim programmatic, HLS later, và cùng một API cho các component khác.
+
+Commands to install (run in project root):
+
+```bash
+# Install Video.js and types (you can use npm/yarn/pnpm)
+pnpm add video.js
+pnpm add -D @types/video.js
+```
+
+Files to add/modify (planned):
+- add: `components/upload/VideoJsPlayer.tsx` (wrapper React + Video.js)
+- modify: `components/upload/VideoPreviewPlayer.tsx` to use `VideoJsPlayer` (or replace usages in `UploadModal.tsx`)
+- modify: `app/globals.css` to import Video.js CSS if needed
+
+Implementation checklist (acceptance criteria):
+- [ ] Add Video.js dependency and types to project (`package.json`)
+- [ ] Create `VideoJsPlayer.tsx` with props: `videoUrl`, `trimStart?`, `trimEnd?`, `onTimeUpdate?`, `autoplay?`, `muted?`, `poster?`, `aspectRatio?`
+  - Initialize Video.js on mount, dispose on unmount
+  - Programmatic seek to `trimStart` and loop between `trimStart`/`trimEnd`
+  - Emit `timeupdate` via `onTimeUpdate`
+  - Responsive + support vertical 9:16 layout
+- [ ] Update `VideoPreviewPlayer.tsx` to render `VideoJsPlayer` when `videoUrl` is present
+- [ ] Preserve `URL.revokeObjectURL` cleanup in `UploadModal`/Preview
+- [ ] Add manual test steps to QA section below
+
+Implementation notes:
+- Use dynamic import of `video.js` inside `useEffect` to avoid SSR issues, and import its CSS (either in `globals.css` or via dynamic import)
+- Keep the wrapper API minimal so `TrimTool`, `ThumbnailSelector` can interact via props/callbacks
+- If `@types/video.js` is not perfect, use `any` for the player instance to avoid type blocking
+
+Manual integration test (add to QA):
+- Start dev server: `pnpm dev`
+- Open `http://localhost:3000/upload`
+- Select a sample MP4
+- Verify: video loads and plays via Video.js UI
+- Verify: trimming — set `trimStart` and `trimEnd` (via TrimTool) and confirm player loops between start and end
+- Verify: `onTimeUpdate` in UploadModal receives current time updates
+- Verify: object URL revoked on modal close (no memory leak)
+
+Estimated work: 2-3 edits + dependency install. After you confirm, I can start implementing the wrapper and update components.
 ````

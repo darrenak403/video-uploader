@@ -21,9 +21,22 @@ export default function TrimTool({
   const [end, setEnd] = useState(trimEnd || duration);
 
   useEffect(() => {
-    setStart(trimStart);
-    setEnd(trimEnd || duration);
-  }, [trimStart, trimEnd, duration]);
+    // Only update local state when incoming props differ to avoid unnecessary renders.
+    const targetStart = trimStart;
+    const targetEnd = trimEnd ?? duration;
+
+    if (start === targetStart && end === targetEnd) return;
+
+    // Schedule state updates asynchronously to avoid cascading synchronous renders.
+    const id = window.setTimeout(() => {
+      setStart(targetStart);
+      setEnd(targetEnd);
+    }, 0);
+
+    return () => {
+      clearTimeout(id);
+    };
+  }, [trimStart, trimEnd, duration, start, end]);
 
   const handleStartChange = (value: number) => {
     const newStart = Math.max(0, Math.min(value, end - 1));
