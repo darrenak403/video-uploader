@@ -3,7 +3,6 @@
 import {useRef, useEffect, useState} from "react";
 import {MdHd} from "react-icons/md";
 import {formatDuration} from "@/lib/utils";
-import VideoJsPlayer from "./VideoJsPlayer";
 
 interface VideoPreviewPlayerProps {
   videoUrl: string | null;
@@ -70,17 +69,14 @@ export default function VideoPreviewPlayer({
 
   return (
     <div className="w-full max-w-[360px] mx-auto rounded-2xl overflow-hidden bg-black relative shadow-2xl">
-      <VideoJsPlayer
-        videoUrl={videoUrl}
-        trimStart={trimStart}
-        trimEnd={trimEnd}
-        autoplay={autoplay}
-        muted={true}
-        aspectRatio="9/16"
-        onTimeUpdate={(t) => {
-          setCurrentTime(t);
-          onTimeUpdate?.(t);
-        }}
+      <video
+        ref={videoRef}
+        src={videoUrl || undefined}
+        autoPlay={autoplay}
+        muted
+        playsInline
+        controls
+        className="w-full h-full aspect-9/16 object-cover"
       />
 
       {/* Duration overlay - Top right */}
